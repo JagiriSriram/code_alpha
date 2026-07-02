@@ -6,7 +6,7 @@ This repository contains the projects completed during the software engineering 
 
 ## 📂 Projects Directory
 
-| # | Project Name | Directory | Tech Stack | Brief Description |
+| S.no | Project Name | Directory | Tech Stack | Brief Description |
 |---|--------------|-----------|------------|-------------------|
 | 1 | **smartKart (E-Commerce)** | [`E-commerce website/`](./E-commerce%20website/) | Python, Django, SQLite, Vanilla CSS, Vanilla JS | A fully-functional premium e-commerce site with product listings, dynamic details cards, interactive AJAX cart drawer, customer profiles, order histories, and inventory stock tracking. |
 
