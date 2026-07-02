@@ -1,0 +1,345 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connectify | Premium Social Network</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="dark-theme">
+    <!-- App-wide Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- App Loader -->
+    <div id="app-loader" class="app-loader">
+        <div class="loader-spinner"></div>
+        <span class="loader-text">Igniting Connectify...</span>
+    </div>
+
+    <!-- AUTHENTICATION SCREEN -->
+    <div id="auth-screen" class="auth-screen hidden">
+        <div class="auth-card-glow"></div>
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i data-lucide="radio" class="logo-icon animate-pulse"></i>
+                    <span class="logo-text-large">CONNECTIFY</span>
+                </div>
+                <p id="auth-subtitle" class="auth-subtitle">Enter the social stratosphere.</p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <label for="login-username"><i data-lucide="user"></i> Username</label>
+                    <input type="text" id="login-username" placeholder="Enter your username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="login-password"><i data-lucide="lock"></i> Password</label>
+                    <input type="password" id="login-password" placeholder="Enter your password" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary auth-submit-btn">
+                    <span>Log In</span> <i data-lucide="log-in"></i>
+                </button>
+                <div class="auth-toggle">
+                    Don't have an account? <span id="show-signup" class="toggle-link">Sign up</span>
+                </div>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signup-form" class="auth-form hidden">
+                <div class="form-group">
+                    <label for="signup-username"><i data-lucide="user"></i> Username</label>
+                    <input type="text" id="signup-username" placeholder="Pick a unique username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="signup-display-name"><i data-lucide="smile"></i> Display Name</label>
+                    <input type="text" id="signup-display-name" placeholder="What should we call you?" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email"><i data-lucide="mail"></i> Email Address</label>
+                    <input type="email" id="signup-email" placeholder="you@example.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="signup-password"><i data-lucide="lock"></i> Password</label>
+                    <input type="password" id="signup-password" placeholder="Choose a strong password" required autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn btn-gradient auth-submit-btn">
+                    <span>Create Account</span> <i data-lucide="sparkles"></i>
+                </button>
+                <div class="auth-toggle">
+                    Already have an account? <span id="show-login" class="toggle-link">Log in</span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP SCREEN -->
+    <div id="app-screen" class="app-screen hidden">
+        <div class="app-container">
+            
+            <!-- LEFT NAVIGATION SIDEBAR -->
+            <aside class="sidebar">
+                <div class="sidebar-sticky">
+                    <div class="sidebar-header">
+                        <div class="logo">
+                            <i data-lucide="radio" class="logo-icon"></i>
+                            <span class="logo-text">CONNECTIFY</span>
+                        </div>
+                    </div>
+                    
+                    <nav class="sidebar-nav">
+                        <a href="#" class="nav-item active" data-view="home">
+                            <i data-lucide="home"></i> <span>Home Feed</span>
+                        </a>
+                        <a href="#" class="nav-item" data-view="explore">
+                            <i data-lucide="search"></i> <span>Explore</span>
+                        </a>
+                        <a href="#" class="nav-item" id="nav-profile-link" data-view="profile">
+                            <i data-lucide="user-round"></i> <span>Profile</span>
+                        </a>
+                    </nav>
+
+                    <button class="btn btn-gradient sidebar-post-btn" id="open-post-modal-btn">
+                        <i data-lucide="plus-circle"></i> <span>Connectify Post</span>
+                    </button>
+
+                    <div class="sidebar-footer">
+                        <div class="sidebar-user" id="current-user-card">
+                            <img src="{% static 'images/default-avatar.png' %}" alt="Avatar" class="avatar-sm" id="sidebar-avatar">
+                            <div class="user-info">
+                                <span class="display-name" id="sidebar-display-name">Connectify User</span>
+                                <span class="username" id="sidebar-username">@connectify_user</span>
+                            </div>
+                        </div>
+                        <button class="btn-logout" id="logout-btn" title="Log Out">
+                            <i data-lucide="log-out"></i>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- MAIN DYNAMIC CONTENT WINDOW -->
+            <main class="main-content">
+                <!-- TOP HEADER -->
+                <header class="main-header">
+                    <h2 id="view-title">Home Feed</h2>
+                    <div class="mobile-nav-toggle">
+                        <i data-lucide="menu" id="mobile-menu-btn"></i>
+                    </div>
+                </header>
+
+                <div class="content-body">
+                    
+                    <!-- HOME FEED VIEW -->
+                    <div id="view-home" class="app-view">
+                        <!-- Post Creator Box -->
+                        <div class="post-creator-card">
+                            <form id="create-post-form">
+                                <div class="creator-row">
+                                    <img src="{% static 'images/default-avatar.png' %}" alt="Avatar" class="avatar-md" id="creator-avatar">
+                                    <textarea id="post-content-input" placeholder="What's glowing in your stratosphere?" max_length="500" required></textarea>
+                                </div>
+                                <div id="post-image-preview-container" class="post-image-preview-container hidden">
+                                    <img id="post-image-preview" src="#" alt="Post image preview">
+                                    <button type="button" id="remove-preview-btn" class="remove-preview-btn"><i data-lucide="x"></i></button>
+                                </div>
+                                <div class="creator-actions">
+                                    <label class="btn-media-upload" title="Upload Post Image">
+                                        <i data-lucide="image"></i> <span>Photo</span>
+                                        <input type="file" id="post-image-input" accept="image/*" class="hidden">
+                                    </label>
+                                    <div class="feed-tabs-container">
+                                        <button type="button" class="feed-tab active" data-feed="global">Global</button>
+                                        <button type="button" class="feed-tab" data-feed="followed">Following</button>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Post</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Posts Feed Container -->
+                        <div id="posts-container" class="posts-container">
+                            <!-- Posts loaded dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- PROFILE VIEW -->
+                    <div id="view-profile" class="app-view hidden">
+                        <!-- Profile Header -->
+                        <div class="profile-header-card">
+                            <div class="cover-image-container">
+                                <img src="{% static 'images/default-cover.png' %}" alt="Cover Image" id="profile-cover">
+                            </div>
+                            <div class="profile-meta-row">
+                                <div class="profile-avatar-container">
+                                    <img src="{% static 'images/default-avatar.png' %}" alt="Profile Avatar" id="profile-avatar">
+                                </div>
+                                <div class="profile-actions-container">
+                                    <button class="btn btn-outline" id="edit-profile-btn">Edit Profile</button>
+                                    <button class="btn btn-primary hidden" id="follow-profile-btn">Follow</button>
+                                </div>
+                            </div>
+                            <div class="profile-info-container">
+                                <h2 class="profile-display-name" id="profile-display-name">Connectify User</h2>
+                                <p class="profile-username" id="profile-username">@connectify_user</p>
+                                <p class="profile-bio" id="profile-bio">This is where the user bio will shine.</p>
+                                
+                                <div class="profile-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-value" id="profile-stat-posts">0</span>
+                                        <span class="stat-label">Posts</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value" id="profile-stat-followers">0</span>
+                                        <span class="stat-label">Followers</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value" id="profile-stat-following">0</span>
+                                        <span class="stat-label">Following</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="profile-tabs">
+                                <button class="profile-tab active" data-profile-tab="posts">My Posts</button>
+                                <button class="profile-tab" data-profile-tab="liked">Liked Posts</button>
+                            </div>
+                        </div>
+
+                        <!-- Profile Posts Feed -->
+                        <div id="profile-posts-container" class="posts-container">
+                            <!-- Loaded dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- EXPLORE / SEARCH VIEW -->
+                    <div id="view-explore" class="app-view hidden">
+                        <div class="search-container-large">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <input type="text" id="explore-search-input" placeholder="Search users by username or display name...">
+                        </div>
+                        <div class="search-results-section">
+                            <h3 class="section-title">Search Results</h3>
+                            <div id="search-users-results" class="users-list-grid">
+                                <!-- Users show up here -->
+                                <p class="no-results-msg">Type a name to discover users on Connectify.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+
+            <!-- RIGHT INFO SIDEBAR -->
+            <aside class="right-sidebar">
+                <!-- Search Box -->
+                <div class="search-container">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="quick-search-input" placeholder="Search Connectify...">
+                </div>
+
+                <!-- Who to Follow Recommendations -->
+                <div class="recommendations-card">
+                    <h3>Who to Follow</h3>
+                    <div id="who-to-follow-container" class="who-to-follow-container">
+                        <!-- Suggestions loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Footer Info -->
+                <footer class="app-footer">
+                    <p>&copy; 2026 Connectify Space. Developed for CodeAlpha Task 2.</p>
+                </footer>
+            </aside>
+
+        </div>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- EDIT PROFILE MODAL -->
+    <div id="edit-profile-modal" class="modal-overlay hidden">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Edit Profile</h3>
+                <button class="modal-close" id="close-edit-modal-btn"><i data-lucide="x"></i></button>
+            </div>
+            <form id="edit-profile-form">
+                <div class="modal-body">
+                    <!-- Preview Cover & Avatar Upload -->
+                    <div class="edit-profile-images">
+                        <div class="cover-upload-wrapper">
+                            <img src="{% static 'images/default-cover.png' %}" alt="Edit Cover" id="edit-cover-preview">
+                            <label class="cover-upload-btn">
+                                <i data-lucide="camera"></i> Change Cover
+                                <input type="file" id="edit-cover-input" accept="image/*" class="hidden">
+                            </label>
+                        </div>
+                        <div class="avatar-upload-wrapper">
+                            <img src="{% static 'images/default-avatar.png' %}" alt="Edit Avatar" id="edit-avatar-preview">
+                            <label class="avatar-upload-btn">
+                                <i data-lucide="camera"></i>
+                                <input type="file" id="edit-avatar-input" accept="image/*" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Fields -->
+                    <div class="form-group">
+                        <label for="edit-display-name">Display Name</label>
+                        <input type="text" id="edit-display-name" placeholder="Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-bio">Bio</label>
+                        <textarea id="edit-bio" placeholder="Tell Connectify about yourself..." max_length="200"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" id="cancel-edit-modal-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FLOATING CREATE POST MODAL (MOBILE OR QUICK ACTION) -->
+    <div id="quick-post-modal" class="modal-overlay hidden">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Create Connectify Post</h3>
+                <button class="modal-close" id="close-post-modal-btn"><i data-lucide="x"></i></button>
+            </div>
+            <form id="quick-post-form">
+                <div class="modal-body">
+                    <div class="creator-row no-border">
+                        <textarea id="quick-post-content-input" placeholder="What's glowing in your stratosphere?" required></textarea>
+                    </div>
+                    <div id="quick-post-image-preview-container" class="post-image-preview-container hidden">
+                        <img id="quick-post-image-preview" src="#" alt="Post image preview">
+                        <button type="button" id="remove-quick-preview-btn" class="remove-preview-btn"><i data-lucide="x"></i></button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <label class="btn-media-upload" title="Upload Post Image">
+                        <i data-lucide="image"></i> <span>Photo</span>
+                        <input type="file" id="quick-post-image-input" accept="image/*" class="hidden">
+                    </label>
+                    <button type="submit" class="btn btn-gradient">Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script Entry -->
+    <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

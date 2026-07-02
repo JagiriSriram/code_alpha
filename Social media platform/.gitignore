@@ -1,0 +1,39 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+*.venv
+
+# Django Database (SQLite)
+*.sqlite3
+db.sqlite3
+
+# Python Caches and Compiled Files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.noseids/
+
+# Django Media Uploads (User avatars & post images)
+# Keep only default placeholders in repository
+media/avatars/*
+!media/avatars/default.png
+media/covers/*
+!media/covers/default.png
+media/posts/*
+
+# IDE and OS specific files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.DS_Store
+Thumbs.db
