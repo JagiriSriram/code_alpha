@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout | smartKart{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+    <div class="checkout-layout">
+        <!-- Billing / Shipping Form -->
+        <div class="checkout-form-panel">
+            <h2 class="checkout-section-title"><i class="fa-regular fa-credit-card"></i> Shipping & Billing Details</h2>
+            
+            <form method="post" action="" class="auth-form checkout-form">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="form-errors">
+                        {% for error in form.non_field_errors %}
+                            <p class="error-msg"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.first_name.id_for_label }}">First Name</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <span class="field-error">{{ form.first_name.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <span class="field-error">{{ form.last_name.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="{{ form.email.id_for_label }}">Email Address</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <span class="field-error">{{ form.email.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="{{ form.address.id_for_label }}">Delivery Address</label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                            <span class="field-error">{{ form.address.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.city.id_for_label }}">City</label>
+                        {{ form.city }}
+                        {% if form.city.errors %}
+                            <span class="field-error">{{ form.city.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.zip_code.id_for_label }}">Zip / Postal Code</label>
+                        {{ form.zip_code }}
+                        {% if form.zip_code.errors %}
+                            <span class="field-error">{{ form.zip_code.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="{{ form.country.id_for_label }}">Country</label>
+                        {{ form.country }}
+                        {% if form.country.errors %}
+                            <span class="field-error">{{ form.country.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="payment-mock-alert">
+                    <p><i class="fa-solid fa-circle-info"></i> <strong>Note:</strong> This is a demo checkout. No actual credit card information is required. Clicking "Place Order" completes the transaction instantly.</p>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg btn-block place-order-btn">
+                    Place Order (₹{{ cart.get_total_price }}) <i class="fa-solid fa-lock"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Order Summary Side-Panel -->
+        <div class="checkout-summary-panel">
+            <h3 class="checkout-section-title">Order Summary</h3>
+            
+            <div class="checkout-summary-items">
+                {% for item in cart %}
+                <div class="summary-item-row">
+                    <div class="summary-item-img">
+                        <img src="{{ item.product.get_image_url }}" alt="{{ item.product.name }}">
+                    </div>
+                    <div class="summary-item-details">
+                        <h4>{{ item.product.name }}</h4>
+                        <p class="qty-price">Qty: {{ item.quantity }} &times; ₹{{ item.price }}</p>
+                    </div>
+                    <div class="summary-item-total">
+                        ₹{{ item.total_price }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <hr class="divider">
+
+            <div class="summary-pricing-rows">
+                <div class="summary-pricing-row">
+                    <span>Subtotal</span>
+                    <span class="val">₹{{ cart.get_total_price }}</span>
+                </div>
+                <div class="summary-pricing-row">
+                    <span>Shipping</span>
+                    <span class="val text-success">FREE</span>
+                </div>
+                <div class="summary-pricing-row">
+                    <span>Taxes</span>
+                    <span class="val">₹0.00</span>
+                </div>
+                <hr class="divider">
+                <div class="summary-pricing-row total-row">
+                    <span>Total Due</span>
+                    <span class="val price-total">₹{{ cart.get_total_price }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

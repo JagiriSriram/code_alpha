@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Discover Premium Products | smartKart{% endblock %}
+
+{% block content %}
+<!-- Hero Promo Section -->
+<section class="hero-section">
+    <div class="hero-content animate-fade-in">
+        <span class="hero-tag">Summer Collection 2026</span>
+        <h1 class="hero-title">Elevate Your Daily Living</h1>
+        <p class="hero-subtitle">Explore our handpicked collection of premium, state-of-the-art products crafted with unmatched quality.</p>
+        <div class="hero-actions">
+            <a href="#products-grid-section" class="btn btn-primary btn-lg">Explore Catalog</a>
+            <a href="#" class="btn btn-secondary btn-lg">Learn More</a>
+        </div>
+    </div>
+</section>
+
+<!-- Main Catalog Container -->
+<div class="catalog-container" id="products-grid-section">
+    <!-- Filter and Sort Sidebar or Topbar -->
+    <div class="catalog-controls">
+        <div class="category-pills">
+            <a href="{% url 'shop:product_list' %}" class="category-pill {% if not category %}active{% endif %}">
+                All Products
+            </a>
+            {% for cat in categories %}
+            <a href="{% url 'shop:product_list_by_category' cat.slug %}" class="category-pill {% if category.id == cat.id %}active{% endif %}">
+                {{ cat.name }}
+            </a>
+            {% endfor %}
+        </div>
+
+        <div class="catalog-sorting">
+            <form action="" method="get" class="sort-form" id="sortForm">
+                <!-- Keep search query if active -->
+                {% if query %}
+                    <input type="hidden" name="q" value="{{ query }}">
+                {% endif %}
+                <label for="sort-select">Sort by:</label>
+                <select name="sort" id="sort-select" onchange="this.form.submit()">
+                    <option value="featured" {% if sort == 'featured' or not sort %}selected{% endif %}>Featured</option>
+                    <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+                    <option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <!-- Active Search Info -->
+    {% if query %}
+    <div class="search-result-info">
+        <p>Search results for "<strong>{{ query }}</strong>" ({{ products|length }} found):</p>
+        <a href="{% url 'shop:product_list' %}" class="clear-search-link"><i class="fa-solid fa-circle-xmark"></i> Clear search</a>
+    </div>
+    {% endif %}
+
+    <!-- Products Grid -->
+    {% if products %}
+    <div class="products-grid">
+        {% for product in products %}
+        <article class="product-card">
+            <div class="product-card-image-wrapper">
+                <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="product-card-image" loading="lazy">
+                <div class="product-card-overlay">
+                    <a href="{% url 'shop:product_detail' product.id product.slug %}" class="btn btn-light btn-circle" title="View details">
+                        <i class="fa-solid fa-eye"></i>
+                    </a>
+                </div>
+                <span class="product-card-category">{{ product.category.name }}</span>
+            </div>
+            
+            <div class="product-card-info">
+                <h3 class="product-card-title">
+                    <a href="{% url 'shop:product_detail' product.id product.slug %}">{{ product.name }}</a>
+                </h3>
+                <p class="product-card-description">{{ product.description|truncatewords:12 }}</p>
+                
+                <div class="product-card-footer">
+                    <span class="product-card-price">₹{{ product.price }}</span>
+                    {% if product.stock > 0 %}
+                        <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="{{ product.id }}">
+                            <i class="fa-solid fa-cart-plus"></i> Add
+                        </button>
+                    {% else %}
+                        <span class="badge badge-out-of-stock">Out of Stock</span>
+                    {% endif %}
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-products-state">
+        <i class="fa-solid fa-magnifying-glass no-products-icon"></i>
+        <h3>No products found</h3>
+        <p>Try adjusting your search terms or filters.</p>
+        <a href="{% url 'shop:product_list' %}" class="btn btn-primary">Reset Catalog</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} | smartKart{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="{% url 'shop:product_list' %}">Shop</a>
+        <i class="fa-solid fa-chevron-right breadcrumb-separator"></i>
+        <a href="{% url 'shop:product_list_by_category' product.category.slug %}">{{ product.category.name }}</a>
+        <i class="fa-solid fa-chevron-right breadcrumb-separator"></i>
+        <span aria-current="page">{{ product.name }}</span>
+    </nav>
+
+    <!-- Product Layout -->
+    <div class="product-detail-layout">
+        <!-- Product Image Gallery -->
+        <div class="product-gallery">
+            <div class="product-image-container">
+                <img src="{{ product.get_image_url }}" alt="{{ product.name }}" id="mainProductImage">
+            </div>
+        </div>
+
+        <!-- Product Purchase Information -->
+        <div class="product-info-panel">
+            <span class="product-category-tag">{{ product.category.name }}</span>
+            <h1 class="product-title">{{ product.name }}</h1>
+            
+            <div class="price-rating-row">
+                <span class="product-price">₹{{ product.price }}</span>
+                <span class="stock-indicator {% if product.stock > 0 %}in-stock{% else %}out-of-stock{% endif %}">
+                    <i class="fa-solid {% if product.stock > 0 %}fa-circle-check{% else %}fa-circle-xmark{% endif %}"></i>
+                    {% if product.stock > 0 %}{{ product.stock }} In Stock{% else %}Out of Stock{% endif %}
+                </span>
+            </div>
+
+            <hr class="divider">
+
+            <div class="product-description">
+                <h3>Description</h3>
+                <p>{{ product.description|linebreaks }}</p>
+            </div>
+
+            <hr class="divider">
+
+            {% if product.stock > 0 %}
+            <form action="" method="post" class="purchase-form" id="purchaseForm" data-product-id="{{ product.id }}">
+                {% csrf_token %}
+                <div class="purchase-controls">
+                    <div class="quantity-picker-wrapper">
+                        <label for="quantity">Quantity:</label>
+                        <div class="quantity-picker">
+                            <button type="button" class="qty-btn minus" id="qtyMinus"><i class="fa-solid fa-minus"></i></button>
+                            <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.stock }}" readonly>
+                            <button type="button" class="qty-btn plus" id="qtyPlus" data-max-stock="{{ product.stock }}"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg add-to-cart-detail-btn" id="addToCartDetailBtn">
+                        <i class="fa-solid fa-cart-shopping"></i> Add to Shopping Cart
+                    </button>
+                </div>
+            </form>
+            {% else %}
+            <div class="out-of-stock-alert">
+                <i class="fa-solid fa-bell-slash"></i> This item is currently unavailable. Check back soon!
+            </div>
+            {% endif %}
+
+            <div class="product-benefits">
+                <div class="benefit-item">
+                    <i class="fa-solid fa-truck-fast"></i>
+                    <div>
+                        <h4>Free Shipping</h4>
+                        <p>On orders over ₹9,999</p>
+                    </div>
+                </div>
+                <div class="benefit-item">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <div>
+                        <h4>2 Year Warranty</h4>
+                        <p>100% authentic product guarantee</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+    <section class="related-products-section">
+        <h2 class="section-title">You May Also Like</h2>
+        <div class="products-grid">
+            {% for rel_prod in related_products %}
+            <article class="product-card">
+                <div class="product-card-image-wrapper">
+                    <img src="{{ rel_prod.get_image_url }}" alt="{{ rel_prod.name }}" class="product-card-image" loading="lazy">
+                    <div class="product-card-overlay">
+                        <a href="{% url 'shop:product_detail' rel_prod.id rel_prod.slug %}" class="btn btn-light btn-circle">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="product-card-info">
+                    <h3 class="product-card-title">
+                        <a href="{% url 'shop:product_detail' rel_prod.id rel_prod.slug %}">{{ rel_prod.name }}</a>
+                    </h3>
+                    <div class="product-card-footer">
+                        <span class="product-card-price">₹{{ rel_prod.price }}</span>
+                        <a href="{% url 'shop:product_detail' rel_prod.id rel_prod.slug %}" class="btn btn-outline btn-sm">View</a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Detailed page quantity button handlers
+    const qtyInput = document.getElementById('quantity');
+    const qtyMinus = document.getElementById('qtyMinus');
+    const qtyPlus = document.getElementById('qtyPlus');
+    const purchaseForm = document.getElementById('purchaseForm');
+
+    if (qtyInput && qtyMinus && qtyPlus) {
+        const maxStock = parseInt(qtyPlus.dataset.maxStock);
+        
+        qtyMinus.addEventListener('click', () => {
+            let val = parseInt(qtyInput.value);
+            if (val > 1) {
+                qtyInput.value = val - 1;
+            }
+        });
+
+        qtyPlus.addEventListener('click', () => {
+            let val = parseInt(qtyInput.value);
+            if (val < maxStock) {
+                qtyInput.value = val + 1;
+            }
+        });
+    }
+
+    if (purchaseForm) {
+        purchaseForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const productId = this.dataset.productId;
+            const quantity = qtyInput.value;
+            
+            // Call the global add-to-cart AJAX function from main.js
+            if (window.addToCart) {
+                window.addToCart(productId, quantity);
+            }
+        });
+    }
+</script>
+{% endblock %}

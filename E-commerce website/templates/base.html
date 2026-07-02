@@ -1,0 +1,154 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}smartKart - Premium E-Commerce{% endblock %}</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- CSRF Token for JavaScript AJAX calls -->
+    {% csrf_token %}
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="header-container">
+            <a href="{% url 'shop:product_list' %}" class="brand">
+                <i class="fa-solid fa-gem brand-icon"></i>
+                <span class="brand-text">smart<span>Kart</span></span>
+            </a>
+            
+            <form action="{% url 'shop:product_list' %}" method="get" class="search-form">
+                <div class="search-input-wrapper">
+                    <input type="text" name="q" placeholder="Search premium products..." value="{{ query|default:'' }}" aria-label="Search">
+                    <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+            </form>
+
+            <nav class="nav-menu">
+                <a href="{% url 'shop:product_list' %}" class="nav-link {% if request.resolver_match.view_name == 'shop:product_list' and not category %}active{% endif %}">Shop</a>
+                {% if request.user.is_authenticated %}
+                    <a href="{% url 'shop:profile' %}" class="nav-link {% if request.resolver_match.view_name == 'shop:profile' %}active{% endif %}">
+                        <i class="fa-regular fa-user"></i> {{ request.user.username }}
+                    </a>
+                    <form action="{% url 'shop:logout' %}" method="post" class="logout-form" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-btn nav-link" style="border:none; background:none; cursor:pointer;">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'shop:login' %}" class="nav-link {% if request.resolver_match.view_name == 'shop:login' %}active{% endif %}">Login</a>
+                    <a href="{% url 'shop:register' %}" class="btn btn-outline">Register</a>
+                {% endif %}
+                
+                <button class="cart-toggle-btn" id="cartToggle">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span class="cart-badge" id="cartBadgeCount">{{ cart|length }}</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Floating Messages / Toast Alerts -->
+    {% if messages %}
+    <div class="toast-container" id="toastContainer">
+        {% for message in messages %}
+        <div class="toast {{ message.tags }}">
+            <div class="toast-content">
+                <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% elif message.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-info{% endif %} toast-icon"></i>
+                <span class="toast-text">{{ message }}</span>
+            </div>
+            <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Interactive Sliding Cart Drawer -->
+    <div class="cart-drawer-overlay" id="cartDrawerOverlay"></div>
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-drawer-header">
+            <h3>Your Shopping Cart (<span id="cartDrawerCount">{{ cart|length }}</span>)</h3>
+            <button class="cart-drawer-close" id="cartDrawerClose">&times;</button>
+        </div>
+        <div class="cart-drawer-body" id="cartDrawerBody">
+            <!-- Dynamically populated by main.js -->
+            <div class="cart-loader" style="display:none; text-align:center; padding: 2rem;">
+                <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+            </div>
+            <div class="cart-empty-state" id="cartEmptyState" style="{% if cart|length > 0 %}display:none;{% endif %}">
+                <i class="fa-solid fa-bag-shopping empty-icon"></i>
+                <p>Your shopping bag is empty.</p>
+                <a href="{% url 'shop:product_list' %}" class="btn btn-primary">Start Shopping</a>
+            </div>
+            <div class="cart-items-list" id="cartItemsList">
+                <!-- Cart items inserted here by Javascript -->
+            </div>
+        </div>
+        <div class="cart-drawer-footer" id="cartDrawerFooter" style="{% if cart|length == 0 %}display:none;{% endif %}">
+            <div class="cart-subtotal">
+                <span>Subtotal:</span>
+                <span class="subtotal-amount" id="cartDrawerSubtotal">₹{{ cart.get_total_price }}</span>
+            </div>
+            <p class="cart-shipping-note">Shipping & taxes calculated at checkout.</p>
+            <div class="cart-drawer-actions">
+                <a href="{% url 'shop:order_create' %}" class="btn btn-primary btn-block">
+                    Proceed to Checkout <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>smartKart</h4>
+                <p>Providing premium curated products for modern living. Designed for excellence, crafted for comfort.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#"><i class="fa-brands fa-github"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="{% url 'shop:product_list' %}">All Products</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact Support</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <p><i class="fa-solid fa-location-dot"></i> Karimnagar, Telangana, India</p>
+                <p><i class="fa-solid fa-envelope"></i> support@smartkart.in</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 smartKart Inc. Built for Internship Evaluation. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Theme Core Scripts -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile | smartKart{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <header class="profile-header">
+        <div class="profile-user-avatar">
+            <i class="fa-solid fa-user-gear"></i>
+        </div>
+        <div class="profile-user-details">
+            <h2>Hello, {{ request.user.username }}!</h2>
+            <p><i class="fa-regular fa-envelope"></i> {{ request.user.email }}</p>
+            <p>Member since: {{ request.user.date_joined|date:"F Y" }}</p>
+        </div>
+    </header>
+
+    <section class="orders-section">
+        <h3 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Your Order History</h3>
+        
+        {% if orders %}
+        <div class="orders-list">
+            {% for order in orders %}
+            <div class="order-card" id="order-card-{{ order.id }}">
+                <div class="order-card-summary" onclick="toggleOrderDetails('{{ order.id }}')">
+                    <div class="summary-col">
+                        <span class="label">Order ID</span>
+                        <span class="value">#{{ order.id }}</span>
+                    </div>
+                    <div class="summary-col">
+                        <span class="label">Placed On</span>
+                        <span class="value">{{ order.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="summary-col">
+                        <span class="label">Total Amount</span>
+                        <span class="value total-price">₹{{ order.total_price }}</span>
+                    </div>
+                    <div class="summary-col">
+                        <span class="label">Status</span>
+                        <span class="badge badge-status {% if order.status == 'Pending' %}status-pending{% elif order.status == 'Processing' %}status-processing{% elif order.status == 'Shipped' %}status-shipped{% else %}status-delivered{% endif %}">
+                            {{ order.status }}
+                        </span>
+                    </div>
+                    <div class="summary-toggle-btn">
+                        <i class="fa-solid fa-chevron-down" id="toggle-icon-{{ order.id }}"></i>
+                    </div>
+                </div>
+
+                <!-- Expanded Details Panel -->
+                <div class="order-card-details" id="order-details-{{ order.id }}" style="display: none;">
+                    <div class="details-grid">
+                        <div class="shipping-info">
+                            <h4>Shipping Address</h4>
+                            <p><strong>{{ order.first_name }} {{ order.last_name }}</strong></p>
+                            <p>{{ order.address }}</p>
+                            <p>{{ order.city }}, {{ order.zip_code }}</p>
+                            <p>{{ order.country }}</p>
+                            <p>Email: {{ order.email }}</p>
+                        </div>
+                        
+                        <div class="order-items">
+                            <h4>Order Items</h4>
+                            <table class="order-items-table">
+                               <thead>
+                                   <tr>
+                                       <th>Product</th>
+                                       <th>Price</th>
+                                       <th>Qty</th>
+                                       <th>Subtotal</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   {% for item in order.items.all %}
+                                   <tr>
+                                       <td>
+                                           <a href="{% url 'shop:product_detail' item.product.id item.product.slug %}" class="item-link">
+                                               {{ item.product.name }}
+                                           </a>
+                                       </td>
+                                       <td>₹{{ item.price }}</td>
+                                       <td>{{ item.quantity }}</td>
+                                       <td><strong>₹{{ item.get_cost }}</strong></td>
+                                   </tr>
+                                   {% endfor %}
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-orders-state">
+            <i class="fa-solid fa-receipt empty-icon"></i>
+            <h3>No orders found</h3>
+            <p>You haven't placed any orders yet. When you buy items, they will appear here.</p>
+            <a href="{% url 'shop:product_list' %}" class="btn btn-primary">Start Shopping</a>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleOrderDetails(orderId) {
+        const detailsPanel = document.getElementById(`order-details-${orderId}`);
+        const toggleIcon = document.getElementById(`toggle-icon-${orderId}`);
+        const card = document.getElementById(`order-card-${orderId}`);
+        
+        if (detailsPanel.style.display === 'none') {
+            detailsPanel.style.display = 'block';
+            toggleIcon.className = 'fa-solid fa-chevron-up';
+            card.classList.add('expanded');
+        } else {
+            detailsPanel.style.display = 'none';
+            toggleIcon.className = 'fa-solid fa-chevron-down';
+            card.classList.remove('expanded');
+        }
+    }
+</script>
+{% endblock %}
